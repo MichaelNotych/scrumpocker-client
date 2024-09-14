@@ -2,22 +2,21 @@
 	import { goto } from '$app/navigation';
 	import { getCookie, setCookie } from '$lib';
 
-	type Login = {
-		userName: string;
-		roomName?: string;
-		roomNumber?: string;
-		roomPassword: string;
-	};
-
 	export let data;
 
+	// form data
 	let userName: string = getCookie('userName') || '';
 	let roomName: string = '';
 	let roomNumber: string = data.roomNumber ? data.roomNumber : '';
 	let roomPassword: string = '';
+
+	// form action
 	let action: 'create' | 'join' = data.roomNumber ? 'join' : 'create';
+	let submitingForm: boolean = false;
+
 	$: isFormDataValid = userName && (roomName || roomNumber) && roomPassword;
 	$: title = action === 'create' ? 'Create room' : 'Join room';
+
 
 	const submitHandler = async () => {
 		// create request body
@@ -33,6 +32,7 @@
 			dataToSend = { ...dataToSend, roomNumber };
 		}
 		try {
+			submitingForm = true;
 			const res = await fetch(`http://localhost:5000/room/${action}`, {
 				method: 'POST',
 				headers: {
@@ -43,6 +43,7 @@
 
 			// parsing server answer
 			const json = await res.json();
+			submitingForm = false;
 			if (!json.success) {
 				return console.error(json.error);
 			}
@@ -101,7 +102,7 @@
 			bind:value={roomPassword}
 			autocomplete="off"
 		/>
-		<button class="form__button" class:disabled={!isFormDataValid}>{action}</button>
+		<button class="form__button" class:loading={submitingForm} class:disabled={!isFormDataValid}>{action}</button>
 	</form>
 	<p class="hint">
 		{#if action === 'create'}
@@ -161,6 +162,38 @@
 	.form__button.disabled {
 		pointer-events: none;
 		opacity: 0.5;
+	}
+
+	.form__button.loading {
+		position: relative;
+		pointer-events: none;
+	}
+
+	.form__button.loading::after {
+		content: '';
+		position: absolute;
+		left: calc(50% - 1rem);
+		top: calc(50% - 1rem);
+		width: 2rem;
+		height: 2rem;
+		border-radius: 100%;
+		border: 3px solid #fff;
+		border-top-color: var(--accent-color);
+		animation: spinner 0.9s linear infinite;
+	}
+
+	.form__button.loading::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background-color: var(--accent-color);
+		border-radius: inherit;
+	}
+
+	@keyframes spinner {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	.hint {

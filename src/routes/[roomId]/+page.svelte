@@ -4,25 +4,6 @@
 	import { io } from 'socket.io-client';
 	import { onMount } from 'svelte';
 
-	type User = {
-		_id: string;
-		name: string;
-		room: string;
-	};
-
-	type Vote = {
-		_id: string;
-		userId: string;
-		roomId: string;
-		value: number;
-	};
-
-	type Room = {
-		_id: string;
-		name: string;
-		number: string;
-	};
-
 	export let data;
 
 	const room: Room = data.room;
