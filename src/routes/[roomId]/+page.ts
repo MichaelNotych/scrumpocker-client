@@ -33,10 +33,6 @@ export const load: PageLoad = async ({ params, fetch }) => {
 		goto('/');
 	}
 
-	console.log('page.ts', {
-		room: roomObj.room,
-		user: userObj.user
-	})
 	return {
 		room: roomObj.room,
 		user: userObj.user

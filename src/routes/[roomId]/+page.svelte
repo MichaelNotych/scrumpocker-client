@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Copy, getCookie, Quit } from '$lib';
+	import { Copy, deleteCookie, getCookie, Quit } from '$lib';
 	import { io } from 'socket.io-client';
 	import { onMount } from 'svelte';
 
@@ -101,9 +101,25 @@
 	};
 
 	const handleQuit = () => {
-		socket.emit('leftRoom');
-		goto('/')
-	}
+		socket.emit('leftRoom', {
+			roomId: room._id,
+			userId: currentUser._id
+		});
+		deleteCookie('jwt');
+		socket.disconnect();
+		goto(`/?roomNumber=${room.number}`);
+	};
+
+	// handle tab close/reload
+	window.addEventListener('beforeunload', () => {
+		console.log('lkmlmkmlk')
+		socket.emit('leftRoom', {
+			roomId: room._id,
+			userId: currentUser._id
+		});
+		socket.disconnect();
+		deleteCookie('jwt');
+	});
 </script>
 
 <div class="room">
@@ -113,7 +129,9 @@
 			{room.number}
 			<Copy width={16} height={16} />
 		</button>
-		<button class="room__quit" on:click={handleQuit}>Left room <Quit width={10} height={10} /></button>
+		<button class="room__quit" on:click={handleQuit}
+			>Left room <Quit width={10} height={10} /></button
+		>
 	</div>
 	<div class="room__wrapper">
 		<div class="room__users room__users_top">
