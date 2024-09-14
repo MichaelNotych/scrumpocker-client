@@ -100,26 +100,22 @@
 		});
 	};
 
-	const handleQuit = () => {
+	const handleLeave = () => {
 		socket.emit('leftRoom', {
 			roomId: room._id,
 			userId: currentUser._id
 		});
 		deleteCookie('jwt');
 		socket.disconnect();
+	}
+
+	const handleQuit = () => {
+		handleLeave();
 		goto(`/?roomNumber=${room.number}`);
 	};
 
 	// handle tab close/reload
-	window.addEventListener('beforeunload', () => {
-		console.log('lkmlmkmlk')
-		socket.emit('leftRoom', {
-			roomId: room._id,
-			userId: currentUser._id
-		});
-		socket.disconnect();
-		deleteCookie('jwt');
-	});
+	window.addEventListener('beforeunload', handleLeave);
 </script>
 
 <div class="room">
